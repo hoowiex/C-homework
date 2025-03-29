@@ -1,278 +1,144 @@
 ﻿using System.Numerics;
+using System;
+using System.Threading;
 
 namespace C_lesson
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static string[,] board;
+        static bool[,] revealed;
+        static int size;
+        static string[] symbols =
         {
-            Number1();
-            Number2();
-            Number3();
-            Number4();
-            Number5();
-            Number6();
-            Number7();
-            Number8();
-            Number9();
-            Number10();
-            Console.WriteLine("\n------------------\n\n\"Enter first number: ");
-            int firstNum, secondNum;
+        "A", "B", "C", "D", "E", "F", "G", "H",
+        "I", "J", "K", "L", "M", "N", "O", "P",
+        "Q", "R", "S", "T", "U", "V", "W", "X",
+        "Y", "Z", "1", "2", "3", "4", "5", "6"
+    };
+
+        static void Main()
+        {
+            Console.Write("Введите размер игрового поля (четное число, например, 4, 6, 8): ");
+            while (!int.TryParse(Console.ReadLine(), out size) || size % 2 != 0 ||  size < 2 || size > 10)
+        {
+                Console.Write("Некорректный ввод. Введите четное число от 2 до 10: ");
+            }
+
+            InitBoard();
+            PlayGame();
+        }
+
+        static void InitBoard()
+        {
+            board = new string[size, size];
+            revealed = new bool[size, size];
+
+            int pairsCount = (size * size) / 2;
+            string[] selectedSymbols = new string[pairsCount * 2];
+
+            // Заполняем массив парами символов
+            for (int i = 0; i < pairsCount; i++)
+            {
+                selectedSymbols[i] = symbols[i];
+                selectedSymbols[i + pairsCount] = symbols[i];
+            }
+
+            Random rand = new Random();
+            for (int i = selectedSymbols.Length - 1; i > 0; i--)
+            {
+                int j = rand.Next(i + 1);
+                string temp = selectedSymbols[i];
+                selectedSymbols[i] = selectedSymbols[j];
+                selectedSymbols[j] = temp;
+            }
+
+            // Заполняем игровое поле
+            int index = 0;
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    board[i, j] = selectedSymbols[index++];
+                    revealed[i, j] = false;
+                }
+            }
+        }
+
+        static void PlayGame()
+        {
+            int pairsFound = 0;
+            while (pairsFound < (size * size) / 2)
+            {
+                Console.Clear();
+                PrintBoard();
+
+                Console.Write("Введите координаты первой карты (например, 1 1): ");
+                (int x1, int y1) = GetCoordinates();
+                revealed[x1, y1] = true;
+
+                Console.Clear();
+                PrintBoard();
+
+                Console.Write("Введите координаты второй карты: ");
+                (int x2, int y2) = GetCoordinates();
+                revealed[x2, y2] = true;
+
+                Console.Clear();
+                PrintBoard();
+                Thread.Sleep(1000);
+
+                if (board[x1, y1] == board[x2, y2])
+                {
+                    Console.WriteLine("Вы нашли пару!");
+                    pairsFound++;
+                }
+                else
+                {
+                    Console.WriteLine("Не совпадает. Попробуйте снова.");
+                    revealed[x1, y1] = false;
+                    revealed[x2, y2] = false;
+                }
+
+                Thread.Sleep(1000);
+            }
+
+            Console.WriteLine("Поздравляем! Вы нашли все пары!");
+        }
+
+        static void PrintBoard()
+        {
+            Console.Write("   ");
+            for (int i = 0; i < size; i++) Console.Write(i + " ");
+            Console.WriteLine();
+
+            for (int i = 0; i < size; i++)
+            {
+                Console.Write(i + " ");
+                for (int j = 0; j < size; j++)
+                {
+                    Console.Write(revealed[i, j] ? board[i, j] + " " : "* ");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        static (int, int) GetCoordinates()
+        {
             while (true)
             {
-                if (int.TryParse(Console.ReadLine(), out firstNum))
+                string input = Console.ReadLine();
+                string[] parts = input.Split();
+                if (parts.Length == 2 &&
+                    int.TryParse(parts[0], out int x) &&
+                    int.TryParse(parts[1], out int y) &&
+                    x >= 0 && x < size && y >= 0 && y < size &&
+                    !revealed[x, y])
                 {
-                    break;
+                    return (x, y);
                 }
-
-                Console.WriteLine("Invalid input");
+                Console.WriteLine("Некорректный ввод, попробуйте снова.");
             }
-
-            Console.WriteLine("Enter second number: ");
-            while (true)
-            {
-                if (int.TryParse(Console.ReadLine(), out secondNum))
-                {
-                    break;
-                }
-
-                Console.WriteLine("Invalid input");
-            }
-
-            Console.WriteLine($"Sum:{Number11(firstNum, secondNum)}");
-            Number12();
-        }
-
-        static void Number1()
-        {
-            Console.WriteLine("Enter your name: ");
-            string name = Console.ReadLine();
-
-            Console.WriteLine("Enter your age: ");
-            int age;
-            while (true)
-            {
-                if (int.TryParse(Console.ReadLine(), out age))
-                {
-                    break;
-                }
-
-                Console.WriteLine("Invalid input");
-            }
-
-            Console.WriteLine($"Your name is {name}, your age is {age}.");
-        }
-
-        static void Number2()
-        {
-            int newInt = 15;
-            double newDouble = 9.34;
-            char newChar = 'H';
-            string newString = "hello";
-
-            Console.WriteLine($"\n------------------\n\nInt value: {newInt}\nDouble value: {newDouble}\nChar value: {newChar}\nString value: {newString}");
-        }
-
-        static void Number3()
-        {
-            Console.WriteLine("\n------------------\n\nEnter string to convert to int: ");
-
-            while (true)
-            {
-                if (int.TryParse(Console.ReadLine(), out int stringToTransform))
-                {
-                    Console.WriteLine($"Converted and doubled number: {stringToTransform * 2}");
-                    break;
-                }
-
-                Console.WriteLine("Cannot be converted to int");
-            }
-        }
-
-        static void Number4()
-        {
-            Console.WriteLine("\n------------------\n\nEnter a number to check:");
-            int number;
-            while (true)
-            {
-                if (int.TryParse(Console.ReadLine(), out number))
-                {
-                    break;
-                }
-
-                Console.WriteLine("Invalid input");
-            }
-
-            if (number > 0)
-            {
-                Console.WriteLine("Number is positive");
-            }
-            else if (number < 0)
-            {
-                Console.WriteLine("Number is negative");
-            }
-            else
-            {
-                Console.WriteLine("Number is zero");
-            }
-        }
-
-        static void Number5()
-        {
-            Console.WriteLine("\n------------------\n\nEnter number of month: ");
-
-            int month;
-            while (true)
-            {
-                if (int.TryParse(Console.ReadLine(), out month))
-                {
-                    break;
-                }
-
-                Console.WriteLine("Invalid input");
-            }
-
-            switch (month)
-            {
-                case 1:
-                    Console.WriteLine("January");
-                    break;
-                case 2:
-                    Console.WriteLine("February");
-                    break;
-                case 3:
-                    Console.WriteLine("March");
-                    break;
-                case 4:
-                    Console.WriteLine("April");
-                    break;
-                case 5:
-                    Console.WriteLine("May");
-                    break;
-                case 6:
-                    Console.WriteLine("June");
-                    break;
-                case 7:
-                    Console.WriteLine("July");
-                    break;
-                case 8:
-                    Console.WriteLine("August");
-                    break;
-                case 9:
-                    Console.WriteLine("September");
-                    break;
-                case 10:
-                    Console.WriteLine("October");
-                    break;
-                case 11:
-                    Console.WriteLine("November");
-                    break;
-                case 12:
-                    Console.WriteLine("December");
-                    break;
-                default:
-                    Console.WriteLine("Invalid month number");
-                    break;
-            }
-        }
-
-        static void Number6()
-        {
-            Console.WriteLine("\n------------------\n\n");
-            for (int i = 0; i < 101; i++)
-            {
-                if (i % 2 == 0)
-                {
-                    Console.WriteLine(i);
-                }
-            }
-        }
-
-        static void Number7()
-        {
-            int sum = 0;
-            int i = 1;
-
-            while (i <= 50)
-            {
-                sum += i;
-                i++;
-            }
-
-            Console.WriteLine("\n------------------\n\n\"Sum from 1 to 50: " + sum);
-        }
-
-        static void Number8()
-        {
-            int[] array = new int[10];
-
-            for (int i = 0; i < 10; i++)
-            {
-                array[i] = i + 1;
-                Console.WriteLine("\n------------------\n\n");
-                Console.WriteLine(array[i] + "/t");
-            }
-        }
-
-        static void Number9()
-        {
-            Random random = new Random();
-            int randomNumber = random.Next(0, 101);
-
-            Console.WriteLine($"\n------------------\n\nRandom number: {randomNumber}");
-        }
-
-        static void Number10()
-        {
-            Random random = new Random();
-            int[,] array = new int[3, 3];
-
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    array[i, j] = random.Next(1, 11);
-                }
-            }
-
-            Console.WriteLine("\n------------------\n\n\"Array: ");
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    Console.Write(array[i, j] + "\t");
-                }
-            }
-        }
-
-        static int Number11(int firstNum, int secondNum)
-        {
-            return firstNum + secondNum;
-        }
-
-        static void Number12()
-        {
-            Random random = new Random();
-            List<int> numbers = new List<int>();
-
-            for (int i = 0; i < 5; i++)
-            {
-                numbers.Add(random.Next(1, 101));
-            }
-
-            Console.WriteLine("\n------------------\n\n\"Generated numbers:");
-            for (int i = 0; i < numbers.Count; i++)
-            {
-                Console.WriteLine(numbers[i]);
-            }
-
-            int sum = 0;
-            for (int i = 0; i < numbers.Count; i++)
-            {
-                sum += numbers[i];
-            }
-
-            Console.WriteLine("Sum: " + sum);
         }
     }
 }
